@@ -1,24 +1,23 @@
-from flask import Flask, jsonify, request
-import random
-
+from flask import Flask, render_template, request, redirect, url_for, flash
+import sqlite3
+import json
 
 app = Flask(__name__)
 
-# Create mock data to show off our api 
-# (this would normally be data from a database)
-sensor_one_data = {
-    'sensor_id': 1,
-    'sensor_name': 'Sensor One',
-    'temperature': random.randint(0, 100),
-    'humidity': random.randint(0, 100)
-}
+connection = sqlite3.connect('database.db')
+cursor = connection.cursor()
+cursor.execute('CREATE TABLE IF NOT EXISTS sensors (id INTEGER PRIMARY KEY, temperature REAL, humidity REAL, pressure REAL, light_intensity REAL, motion_detected INTEGER, timestamp TEXT, latitude REAL, longitude REAL)')
 
-sensor_two_data = {
-    'sensor_id': 2,
-    'sensor_name': 'Sensor One',
-    'temperature': random.randint(0, 100),
-    'humidity': random.randint(0, 100)
-}
+# Read in json file 
+traffic = json.load(open('fake_data.json'))
+columns = ['temperature', 'humidity', 'pressure', 'light_intensity', 'motion_detected', 'timestamp', 'latitude', 'longitude']
+for row in traffic:
+    keys = tuple(row[c] for c in columns)
+    cursor.execute('INSERT INTO sensors (temperature, humidity, pressure, light_intensity, motion_detected, timestamp, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', keys)
+    print('Inserted row:', keys)
+
+connection.commit()
+connection.close()
 
 
 
@@ -26,7 +25,7 @@ sensor_two_data = {
 
 @app.route('/')
 def home_page():
-    return 'Welcome to the home page!'
+    return 'welcome to the home page!'
 
 # Define rest endpoint
 @app.route('/api', methods=['GET', 'POST'])
@@ -38,31 +37,17 @@ def api_page():
     else:
         return 'Invalid request'
 
-@app.route('/api/sensor_one', methods=['GET'])
-def sensor_one():
-    return jsonify(sensor_one_data)
+@app.route('/api/sensors', methods=['GET'])
+def get_sensors():
+    connection = sqlite3.connect('database.db')
+    cursor = connection.cursor()
+    cursor.execute('SELECT * FROM sensors')
+    sensors = cursor.fetchall()
+    connection.close()
+    return json.dumps(sensors)
 
-@app.route('/api/sensor_two', methods=['GET'])
-def sensor_two():
-    return jsonify(sensor_two_data)
 
-@app.route('/api/all_sensors', methods=['GET'])
-def all_sensors():
-    # Return the result of multiple api calls
-    return jsonify([sensor_one_data, sensor_two_data])
 
-@app.route('/api/sensor_one/average_temperature', methods=['GET'])
-def sensor_one_average_temperature():
-    # Return the average temperature of sensor one
-    return jsonify(sensor_one_data['temperature'])
 
-@app.route('/api/sensor_two/average_temperature', methods=['GET'])
-def sensor_two_average_temperature():
-    # Return the average temperature of sensor two
-    return jsonify(sensor_two_data['temperature'])
-
-@app.route('/api/all_sensors/average_temperature', methods=['GET'])
-def all_sensors_average_temperature():
-    # Return the average temperature of all sensors
-    return jsonify((sensor_one_data['temperature'] + sensor_two_data['temperature']) / 2)
-
+if __name__ == '__main__':
+    app.run(debug=True)
