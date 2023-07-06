@@ -1,3 +1,5 @@
+# This class is used to handle invalid usage of the API
+# Can be easily extended to handle other errors
 class InvalidUsage(Exception):
     status_code = 400
 

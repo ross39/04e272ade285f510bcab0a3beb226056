@@ -49,6 +49,7 @@ def api_page():
 
 @app.route('/api/sensors', methods=['GET'])
 def get_sensors():
+    # Try and execute the query and if it fails, return http error 400
     try:
         connection = sqlite3.connect('database.db')
         cursor = connection.cursor()
@@ -56,8 +57,9 @@ def get_sensors():
         sensors = cursor.fetchall()
         connection.close()
         return json.dumps(sensors)
-    except ValueError:  
-        return 'Houston, we have a problem retrieving the sensors'
+    except ValueError:
+        raise InvalidUsage(400)
+    
 
 @app.route('/api/sensors/<int:sensor_id>', methods=['GET'])
 def get_sensor(sensor_id):
@@ -69,8 +71,7 @@ def get_sensor(sensor_id):
         connection.close()
         return json.dumps(sensor)
     except ValueError:
-        return 'Houston, we have a problem retrieving specific sensor data'
-    
+        return InvalidUsage(400)
 
 #Query the average temperature for a given sensor
 @app.route('/api/sensors/<int:sensor_id>/temperature', methods=['GET'])
@@ -83,7 +84,7 @@ def get_sensor_temperature(sensor_id):
         connection.close()
         return json.dumps(sensor)
     except ValueError:
-        return 'Houston, we have a problem retrieving average temeperature from a specific sensor'
+        return InvalidUsage(400)
 
 #Query the average humidity for a given sensor
 @app.route('/api/sensors/<int:sensor_id>/humidity', methods=['GET'])
@@ -96,8 +97,8 @@ def get_sensor_humidity(sensor_id):
         connection.close()
         return json.dumps(sensor)
     except ValueError:
-        return 'Houston, we have a problem!'
-
+        return InvalidUsage(400)
+    
 #Query all data for a given sensor between now and a given date
 @app.route('/api/sensors/<int:sensor_id>/data/<string:date>', methods=['GET'])
 def get_sensor_data(sensor_id, date):
@@ -109,8 +110,7 @@ def get_sensor_data(sensor_id, date):
         connection.close()
         return json.dumps(sensor)
     except ValueError:
-        return 'Houston, we have a problem retrieving all data from a specific sensor between now and a given date'
-
+        return InvalidUsage(400)
 #Query average temperature for a given sensor between now and a given date
 @app.route('/api/sensors/<int:sensor_id>/temperature/<string:date>', methods=['GET'])
 def get_sensor_temperature_date(sensor_id, date):
@@ -122,7 +122,7 @@ def get_sensor_temperature_date(sensor_id, date):
         connection.close()
         return json.dumps(sensor)
     except ValueError:
-        return 'Houston, we have a problem retrieving average temeperature from a specific sensor between now and a given date'
+        return InvalidUsage(400)
 
 #Query average humidity for a given sensor between now and a given date. Throw an exception if the format is not correct
 @app.route('/api/sensors/<int:sensor_id>/humidity/<string:date>', methods=['GET'])
@@ -135,7 +135,7 @@ def get_sensor_humidity_date(sensor_id, date):
         connection.close()
         return json.dumps(sensor)
     except ValueError:
-        return 'Houston, we have a problem!'
+        return InvalidUsage(400)
     
 
   
