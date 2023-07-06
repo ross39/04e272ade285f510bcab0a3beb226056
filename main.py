@@ -1,6 +1,8 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 import sqlite3
 import json
+import datetime
+from invalid_usage import InvalidUsage
 
 app = Flask(__name__)
 
@@ -20,12 +22,20 @@ connection.commit()
 connection.close()
 
 
+def toDate(dateString): 
+    return datetime.datetime.strptime(dateString, "%Y-%m-%d").date()
 
 
 
 @app.route('/')
 def home_page():
     return 'welcome to the home page!'
+
+@app.errorhandler(InvalidUsage)
+def handle_invalid_usage(error):
+    response = jsonify(error.to_dict())
+    response.status_code = error.status_code
+    return response
 
 # Define rest endpoint
 @app.route('/api', methods=['GET', 'POST'])
@@ -39,53 +49,98 @@ def api_page():
 
 @app.route('/api/sensors', methods=['GET'])
 def get_sensors():
-    connection = sqlite3.connect('database.db')
-    cursor = connection.cursor()
-    cursor.execute('SELECT * FROM sensors')
-    sensors = cursor.fetchall()
-    connection.close()
-    return json.dumps(sensors)
+    try:
+        connection = sqlite3.connect('database.db')
+        cursor = connection.cursor()
+        cursor.execute('SELECT * FROM sensors')
+        sensors = cursor.fetchall()
+        connection.close()
+        return json.dumps(sensors)
+    except ValueError:  
+        return 'Houston, we have a problem retrieving the sensors'
 
 @app.route('/api/sensors/<int:sensor_id>', methods=['GET'])
 def get_sensor(sensor_id):
-    connection = sqlite3.connect('database.db')
-    cursor = connection.cursor()
-    cursor.execute('SELECT * FROM sensors WHERE sensor_id=?', (sensor_id,))
-    sensor = cursor.fetchall()
-    connection.close()
-    return json.dumps(sensor)
-
+    try:
+        connection = sqlite3.connect('database.db')
+        cursor = connection.cursor()
+        cursor.execute('SELECT * FROM sensors WHERE sensor_id=?', (sensor_id,))
+        sensor = cursor.fetchall()
+        connection.close()
+        return json.dumps(sensor)
+    except ValueError:
+        return 'Houston, we have a problem retrieving specific sensor data'
+    
 
 #Query the average temperature for a given sensor
 @app.route('/api/sensors/<int:sensor_id>/temperature', methods=['GET'])
 def get_sensor_temperature(sensor_id):
-    connection = sqlite3.connect('database.db')
-    cursor = connection.cursor()
-    cursor.execute('SELECT AVG(temperature) FROM sensors WHERE sensor_id=?', (sensor_id,))
-    sensor = cursor.fetchall()
-    connection.close()
-    return json.dumps(sensor)
+    try:
+        connection = sqlite3.connect('database.db')
+        cursor = connection.cursor()
+        cursor.execute('SELECT AVG(temperature) FROM sensors WHERE sensor_id=?', (sensor_id,))
+        sensor = cursor.fetchall()
+        connection.close()
+        return json.dumps(sensor)
+    except ValueError:
+        return 'Houston, we have a problem retrieving average temeperature from a specific sensor'
 
 #Query the average humidity for a given sensor
 @app.route('/api/sensors/<int:sensor_id>/humidity', methods=['GET'])
 def get_sensor_humidity(sensor_id):
-    connection = sqlite3.connect('database.db')
-    cursor = connection.cursor()
-    cursor.execute('SELECT AVG(humidity) FROM sensors WHERE sensor_id=?', (sensor_id,))
-    sensor = cursor.fetchall()
-    connection.close()
-    return json.dumps(sensor)
+    try:
+        connection = sqlite3.connect('database.db')
+        cursor = connection.cursor()
+        cursor.execute('SELECT AVG(humidity) FROM sensors WHERE sensor_id=?', (sensor_id,))
+        sensor = cursor.fetchall()
+        connection.close()
+        return json.dumps(sensor)
+    except ValueError:
+        return 'Houston, we have a problem!'
 
-#Query sensor data for a gievn date range
-# TODO: this needs work to get the date range working properly.
-@app.route('/api/sensors/<int:sensor_id>/date', methods=['GET'])
-def get_sensor_date(sensor_id):
-    connection = sqlite3.connect('database.db')
-    cursor = connection.cursor()
-    cursor.execute('SELECT * FROM sensors WHERE sensor_id=? AND timestamp BETWEEN ? AND ?', (sensor_id, request.args.get('start_date'), request.args.get('end_date')))
-    sensor = cursor.fetchall()
-    connection.close()
-    return json.dumps(sensor)
+#Query all data for a given sensor between now and a given date
+@app.route('/api/sensors/<int:sensor_id>/data/<string:date>', methods=['GET'])
+def get_sensor_data(sensor_id, date):
+    try:
+        connection = sqlite3.connect('database.db')
+        cursor = connection.cursor()
+        cursor.execute('SELECT * FROM sensors WHERE sensor_id=? AND timestamp BETWEEN ? AND ?', (sensor_id, date, datetime.datetime.now()))
+        sensor = cursor.fetchall()
+        connection.close()
+        return json.dumps(sensor)
+    except ValueError:
+        return 'Houston, we have a problem retrieving all data from a specific sensor between now and a given date'
+
+#Query average temperature for a given sensor between now and a given date
+@app.route('/api/sensors/<int:sensor_id>/temperature/<string:date>', methods=['GET'])
+def get_sensor_temperature_date(sensor_id, date):
+    try:
+        connection = sqlite3.connect('database.db')
+        cursor = connection.cursor()
+        cursor.execute('SELECT AVG(temperature) FROM sensors WHERE sensor_id=? AND timestamp BETWEEN ? AND ?', (sensor_id, date, datetime.datetime.now()))
+        sensor = cursor.fetchall()
+        connection.close()
+        return json.dumps(sensor)
+    except ValueError:
+        return 'Houston, we have a problem retrieving average temeperature from a specific sensor between now and a given date'
+
+#Query average humidity for a given sensor between now and a given date. Throw an exception if the format is not correct
+@app.route('/api/sensors/<int:sensor_id>/humidity/<string:date>', methods=['GET'])
+def get_sensor_humidity_date(sensor_id, date):
+    try:
+        connection = sqlite3.connect('database.db')
+        cursor = connection.cursor()
+        cursor.execute('SELECT AVG(humidity) FROM sensors WHERE sensor_id=? AND timestamp BETWEEN ? AND ?', (sensor_id, date, datetime.datetime.now()))
+        sensor = cursor.fetchall()
+        connection.close()
+        return json.dumps(sensor)
+    except ValueError:
+        return 'Houston, we have a problem!'
+    
+
+  
+
+  
 
 
 
