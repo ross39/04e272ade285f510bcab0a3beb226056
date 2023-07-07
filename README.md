@@ -30,4 +30,21 @@ Overall I wanted to keep things as simple as possible and get something working 
 Once you run main.py then the SQLite database will be initialized with the values from fake_data.json. * If you re-run main.py be sure to delete the database.db file first or else you will get duplicate entries in the database. This is a known bug, and it is listed in the known bugs' section above.
 
 # API documentation:
-The API is very simple and only used GET requests. However PUT and DELETE and easily be added if more functionality is required.
+The API is very simple and only used GET requests. However PUT and DELETE and easily be added if more functionality is required. Please see fake_data.json for a layout of the fake data. This fake data is stored and persisted in an sqlite database
+
+
+
+
+| End Point  | What it does |
+| ------------- | ------------- |
+| http://127.0.0.1:5000/ | home page! |
+| http://127.0.0.1:5000/api | sanity check |
+| http://127.0.0.1:5000/api/sensors | returns all information about all sensors |
+| http://127.0.0.1:5000/api/sensors/int:sensor_id | returns information about sensor 1 or sensor 2 depending on input, so http://127.0.0.1:5000/api/sensors/1 would return all information about sensor 1 
+| http://127.0.0.1:5000/api/sensors/int:sensor_id/temperature | returns the average temperature for sensor id 
+| http://127.0.0.1:5000/api/sensors/int:sensor_id/humidity | returns the average humidity for sensor id
+| http://127.0.0.1:5000/api/sensors/int:sensor_id/humidity/12-07-2023 | returns the average humidity for a sensor id between todays date and a given date(I just happened to use 12-07-2023 as an example, can be any date. use DD-MM-YY format.
+| http://127.0.0.1:5000/api/sensors/int:sensor_id/temperature/12-07-2023 | returns the average temperature for a sensor id between todays date and a given date(I just happened to use 12-07-2023 as an example, can be any date. use DD-MM-YY format.
+| http://127.0.0.1:5000/api/sensors/int:sensor_id/data/12-07-2023 | returns all data for a given sensor id between todays date and a given date(I just happened to use 12-07-2023 as an example, can be any date. use DD-MM-YY format.
+
+So an example request could be http://127.0.0.1:5000/api/sensors/2/humidity/12-07-2023 which would return the average humidity for sensor 2 between todays date and the given date of 12-07-2023.
