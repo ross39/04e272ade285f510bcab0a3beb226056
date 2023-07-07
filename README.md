@@ -10,8 +10,9 @@
 
 
 # known bugs:
-1. If you re-run main.py then the database will be reinitialized with the values from fake_data.json. This will cause the database to have duplicate entries. This is a bug and should be fixed.
-2. Input validation is not complete, you can enter in weird date formats and the API will accept them with funny results. This is a bug and should be fixed.
+1. If you re-run main.py then the database will be reinitialized with the values from fake_data.json. This will cause the database to have duplicate entries. This is a bug and should be fixed. A fix would be to wrap the database initialization code in a decorator that ensures the function is only run once and only if the database is not already initialized.
+2. The tests invoke the main function which leads to database duplication as described above. The fix is relatively straightforward and is described above.
+3. Input validation is not complete, you can enter in weird date formats and the API will accept them with funny results. This is a bug and should be fixed.
 
 # Why I made the design choices I did:
 1. Python is as close as you can get to pseudocode in real life. I enjoy it for prototyping 
@@ -27,3 +28,6 @@ Overall I wanted to keep things as simple as possible and get something working 
 3. Run the following command to run the application: `python main.py`
 
 Once you run main.py then the SQLite database will be initialized with the values from fake_data.json. * If you re-run main.py be sure to delete the database.db file first or else you will get duplicate entries in the database. This is a known bug, and it is listed in the known bugs' section above.
+
+# API documentation:
+The API is very simple and only used GET requests. However PUT and DELETE and easily be added if more functionality is required.
