@@ -23,9 +23,11 @@
 Overall I wanted to keep things as simple as possible and get something working quickly, hence the choices above. It's far from a complete solution, but the code is modifiable and the changes I have listed above could be implemented without too much effort. 
 
 # How to run the application:
-1. Install python 3.10
-2. Activate the virtual environment by running the following command in the root directory of the project: `source env/bin/activate`
-3. Run the following command to run the application: `python main.py`
+1. Ensure you have python 3 installed 
+2. Activate the virtual environment by running the following command in the root directory of the project: `source env/bin/activate` * assumes you are in root directory
+3. Install the requirements.txt file using the following command `pip install -r requirements.txt` * assumes you are in root directory
+4. Run the following command to run the application: `python main.py`
+5. Run the folliwng command to run the tests `python test.py` 
 
 Once you run main.py then the SQLite database will be initialized with the values from fake_data.json. * If you re-run main.py be sure to delete the database.db file first or else you will get duplicate entries in the database. This is a known bug, and it is listed in the known bugs' section above.
 
